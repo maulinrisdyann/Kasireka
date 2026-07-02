@@ -1,8 +1,6 @@
 <?= $this->extend('layouts/owner') ?>
 <?= $this->section('content') ?>
-
 <h4 class="mb-4 fw-bold"><i class="fas fa-credit-card me-2 text-success"></i>Langganan</h4>
-
 <!-- Info Langganan Saat Ini -->
 <div class="card mb-4" style="border-left:4px solid <?= $tenant['subscription_expires_at'] && strtotime($tenant['subscription_expires_at']) > time() ? '#198754' : '#dc3545' ?>">
     <div class="card-body">
@@ -21,7 +19,6 @@
         <?php endif; ?>
     </div>
 </div>
-
 <div class="row g-4">
     <!-- Form Order Langganan -->
     <div class="col-lg-6">
@@ -53,6 +50,28 @@
                         <?php endforeach; ?>
                     </div>
                     <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            Transfer Ke
+                        </label>
+                        <select name="payment_account"
+                            class="form-select"
+                            required>
+                            <option value="">
+                                -- Pilih Rekening --
+                            </option>
+                            <?php foreach ($payment_accounts as $acc): ?>
+                                <option value="<?= $acc['id'] ?>">
+                                    <?= esc($acc['type']) ?>
+                                    -
+                                    <?= esc($acc['account_name']) ?>
+                                    (
+                                    <?= esc($acc['account_number']) ?>
+                                    )
+                                </option>
+                            <?php endforeach ?>
+                        </select>
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label fw-semibold">Upload Bukti Transfer</label>
                         <input type="file" name="payment_proof" class="form-control" accept=".jpg,.jpeg,.png,.pdf">
                         <div class="form-text">Format: JPG, PNG, PDF. Maks 2MB.</div>
@@ -64,7 +83,6 @@
             </div>
         </div>
     </div>
-
     <!-- Riwayat Order -->
     <div class="col-lg-6">
         <div class="card">
@@ -77,7 +95,14 @@
                 <?php else: ?>
                     <div class="table-responsive">
                         <table class="table table-sm">
-                            <thead class="table-light"><tr><th>Paket</th><th>Jumlah</th><th>Status</th><th>Tanggal</th></tr></thead>
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Paket</th>
+                                    <th>Jumlah</th>
+                                    <th>Status</th>
+                                    <th>Tanggal</th>
+                                </tr>
+                            </thead>
                             <tbody>
                                 <?php foreach ($orders as $o): ?>
                                     <tr>
@@ -99,12 +124,11 @@
         </div>
     </div>
 </div>
-
 <?= $this->endSection() ?>
 <?= $this->section('scripts') ?>
 <script>
-function selectPkg(id) {
-    document.getElementById('pkg' + id).checked = true;
-}
+    function selectPkg(id) {
+        document.getElementById('pkg' + id).checked = true;
+    }
 </script>
 <?= $this->endSection() ?>

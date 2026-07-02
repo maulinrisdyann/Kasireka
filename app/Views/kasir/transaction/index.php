@@ -13,10 +13,23 @@
     <div class="col-lg-7">
         <div class="card mb-3">
             <div class="card-body">
+
+                <div class="mb-2">
+                    <button type="button"
+                        class="btn btn-primary"
+                        onclick="openScanner()">
+                        <i class="fas fa-camera"></i>
+                        Scan Kamera
+                    </button>
+                </div>
+                <div id="scannerBox" style="display:none;width:300px"></div>
                 <div class="input-group">
                     <span class="input-group-text bg-primary text-white"><i class="fas fa-search"></i></span>
+
+
+
                     <input type="text" id="searchProduct" class="form-control form-control-lg"
-                           placeholder="Scan barcode atau ketik nama produk...">
+                        placeholder="Scan barcode atau ketik nama produk...">
                 </div>
                 <div id="searchResults" class="list-group mt-2" style="display:none"></div>
             </div>
@@ -35,7 +48,13 @@
                 <div class="table-responsive" id="cartTableWrap" style="display:none">
                     <table class="table align-middle mb-0" id="cartTable">
                         <thead class="table-light">
-                            <tr><th>Produk</th><th>Harga</th><th style="width:130px">Qty</th><th>Subtotal</th><th></th></tr>
+                            <tr>
+                                <th>Produk</th>
+                                <th>Harga</th>
+                                <th style="width:130px">Qty</th>
+                                <th>Subtotal</th>
+                                <th></th>
+                            </tr>
                         </thead>
                         <tbody id="cartBody"></tbody>
                         <tfoot>
@@ -146,86 +165,152 @@
 
 <?= $this->endSection() ?>
 <?= $this->section('scripts') ?>
+<script src="https://unpkg.com/html5-qrcode"></script>
 <script>
-const BASE_URL  = '<?= base_url() ?>';
-const CSRF_TOKEN = '<?= csrf_hash() ?>';
-const CSRF_NAME  = '<?= csrf_token() ?>';
+    const BASE_URL = '<?= base_url() ?>';
+    const CSRF_TOKEN = '<?= csrf_hash() ?>';
+    const CSRF_NAME = '<?= csrf_token() ?>';
 
-let cart     = [];
-let debounce = null;
+    let cart = [];
+    let debounce = null;
 
-// ---- Search ----
-document.getElementById('searchProduct').addEventListener('input', function () {
-    clearTimeout(debounce);
-    const q = this.value.trim();
-    if (q.length < 2) { hideResults(); return; }
-    debounce = setTimeout(() => searchProducts(q), 300);
-});
+    let html5QrCode;
 
-document.getElementById('searchProduct').addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') {
-        clearTimeout(debounce);
-        searchProducts(this.value.trim(), true);
-    }
-});
 
-function searchProducts(q, exact = false) {
-    fetch(`${BASE_URL}kasir/products/search?q=${encodeURIComponent(q)}`)
-        .then(r => r.json())
-        .then(data => {
-            if (exact && data.length === 1) {
-                addToCart(data[0]);
-                document.getElementById('searchProduct').value = '';
-                hideResults();
-                return;
+    function openScanner() {
+
+        document.getElementById('scannerBox').style.display = 'block';
+
+
+        html5QrCode = new Html5Qrcode("scannerBox");
+
+
+        html5QrCode.start({
+                facingMode: "environment"
+            }, {
+                fps: 10,
+                qrbox: 250
+            },
+
+
+            barcode => {
+
+
+                console.log("Barcode:", barcode);
+
+
+                document.getElementById('searchProduct').value = barcode;
+
+
+                html5QrCode.stop();
+
+
+                searchProducts(barcode, true);
+
+
+                document.getElementById('scannerBox').style.display = 'none';
+
+            },
+
+
+            error => {
+
             }
-            renderResults(data);
-        });
-}
 
-function renderResults(products) {
-    const el = document.getElementById('searchResults');
-    if (!products.length) { el.innerHTML = '<div class="list-group-item text-muted small">Tidak ditemukan.</div>'; el.style.display = 'block'; return; }
-    el.innerHTML = products.map(p =>
-        `<button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+        );
+
+    }
+
+    // ---- Search ----
+    document.getElementById('searchProduct').addEventListener('input', function() {
+        clearTimeout(debounce);
+        const q = this.value.trim();
+        if (q.length < 2) {
+            hideResults();
+            return;
+        }
+        debounce = setTimeout(() => searchProducts(q), 300);
+    });
+
+    document.getElementById('searchProduct').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            clearTimeout(debounce);
+            searchProducts(this.value.trim(), true);
+        }
+    });
+
+    function searchProducts(q, exact = false) {
+        fetch(`${BASE_URL}kasir/products/search?q=${encodeURIComponent(q)}`)
+            .then(r => r.json())
+            .then(data => {
+                if (exact && data.length === 1) {
+                    addToCart(data[0]);
+                    document.getElementById('searchProduct').value = '';
+                    hideResults();
+                    return;
+                }
+                renderResults(data);
+            });
+    }
+
+    function renderResults(products) {
+        const el = document.getElementById('searchResults');
+        if (!products.length) {
+            el.innerHTML = '<div class="list-group-item text-muted small">Tidak ditemukan.</div>';
+            el.style.display = 'block';
+            return;
+        }
+        el.innerHTML = products.map(p =>
+            `<button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
                  onclick="addToCart(${JSON.stringify(p).replace(/"/g,'&quot;')})">
             <span><strong>${p.name}</strong><br><small class="text-muted">${p.barcode ?? ''}</small></span>
             <span class="badge bg-primary rounded-pill">Rp ${numFmt(p.price)}</span>
         </button>`
-    ).join('');
-    el.style.display = 'block';
-}
-
-function hideResults() { document.getElementById('searchResults').style.display = 'none'; }
-document.addEventListener('click', e => { if (!e.target.closest('#searchProduct') && !e.target.closest('#searchResults')) hideResults(); });
-
-// ---- Cart ----
-function addToCart(product) {
-    const existing = cart.find(i => i.id === product.id);
-    if (existing) {
-        existing.qty++;
-    } else {
-        cart.push({ id: product.id, name: product.name, price: parseFloat(product.price), qty: 1, unit: product.unit, stock: parseInt(product.stock) });
+        ).join('');
+        el.style.display = 'block';
     }
-    renderCart();
-    hideResults();
-    document.getElementById('searchProduct').value = '';
-    document.getElementById('searchProduct').focus();
-}
 
-function renderCart() {
-    const body = document.getElementById('cartBody');
-    if (!cart.length) {
-        document.getElementById('cartEmpty').style.display = '';
-        document.getElementById('cartTableWrap').style.display = 'none';
-        document.getElementById('btnProcess').disabled = true;
-        return;
+    function hideResults() {
+        document.getElementById('searchResults').style.display = 'none';
     }
-    document.getElementById('cartEmpty').style.display = 'none';
-    document.getElementById('cartTableWrap').style.display = '';
+    document.addEventListener('click', e => {
+        if (!e.target.closest('#searchProduct') && !e.target.closest('#searchResults')) hideResults();
+    });
 
-    body.innerHTML = cart.map((item, idx) =>
-        `<tr>
+    // ---- Cart ----
+    function addToCart(product) {
+        const existing = cart.find(i => i.id === product.id);
+        if (existing) {
+            existing.qty++;
+        } else {
+            cart.push({
+                id: product.id,
+                name: product.name,
+                price: parseFloat(product.price),
+                qty: 1,
+                unit: product.unit,
+                stock: parseInt(product.stock)
+            });
+        }
+        renderCart();
+        hideResults();
+        document.getElementById('searchProduct').value = '';
+        document.getElementById('searchProduct').focus();
+    }
+
+    function renderCart() {
+        const body = document.getElementById('cartBody');
+        if (!cart.length) {
+            document.getElementById('cartEmpty').style.display = '';
+            document.getElementById('cartTableWrap').style.display = 'none';
+            document.getElementById('btnProcess').disabled = true;
+            return;
+        }
+        document.getElementById('cartEmpty').style.display = 'none';
+        document.getElementById('cartTableWrap').style.display = '';
+
+        body.innerHTML = cart.map((item, idx) =>
+            `<tr>
             <td><div class="fw-semibold">${item.name}</div><small class="text-muted">@ Rp ${numFmt(item.price)}</small></td>
             <td>Rp ${numFmt(item.price)}</td>
             <td>
@@ -239,92 +324,116 @@ function renderCart() {
             <td class="fw-semibold">Rp ${numFmt(item.price * item.qty)}</td>
             <td><button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="removeItem(${idx})"><i class="fas fa-times"></i></button></td>
         </tr>`
-    ).join('');
+        ).join('');
 
-    const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
-    document.getElementById('cartTotal').textContent = 'Rp ' + numFmt(total);
-    document.getElementById('summaryTotal').textContent = 'Rp ' + numFmt(total);
-    document.getElementById('btnProcess').disabled = false;
-    calcChange();
-}
+        const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+        document.getElementById('cartTotal').textContent = 'Rp ' + numFmt(total);
+        document.getElementById('summaryTotal').textContent = 'Rp ' + numFmt(total);
+        document.getElementById('btnProcess').disabled = false;
+        calcChange();
+    }
 
-function changeQty(idx, delta) { cart[idx].qty = Math.max(1, Math.min(cart[idx].stock, cart[idx].qty + delta)); renderCart(); }
-function setQty(idx, v) { cart[idx].qty = Math.max(1, Math.min(cart[idx].stock, parseInt(v) || 1)); renderCart(); }
-function removeItem(idx) { cart.splice(idx, 1); renderCart(); }
+    function changeQty(idx, delta) {
+        cart[idx].qty = Math.max(1, Math.min(cart[idx].stock, cart[idx].qty + delta));
+        renderCart();
+    }
 
-// ---- Payment ----
-document.getElementById('paymentAmount').addEventListener('input', calcChange);
-document.querySelectorAll('.quick-cash').forEach(btn => {
-    btn.addEventListener('click', function () {
-        document.getElementById('paymentAmount').value = parseInt(this.dataset.val) + parseInt(document.getElementById('paymentAmount').value || 0);
+    function setQty(idx, v) {
+        cart[idx].qty = Math.max(1, Math.min(cart[idx].stock, parseInt(v) || 1));
+        renderCart();
+    }
+
+    function removeItem(idx) {
+        cart.splice(idx, 1);
+        renderCart();
+    }
+
+    // ---- Payment ----
+    document.getElementById('paymentAmount').addEventListener('input', calcChange);
+    document.querySelectorAll('.quick-cash').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.getElementById('paymentAmount').value = parseInt(this.dataset.val) + parseInt(document.getElementById('paymentAmount').value || 0);
+            calcChange();
+        });
+    });
+    document.getElementById('exactPayBtn').addEventListener('click', function() {
+        const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+        document.getElementById('paymentAmount').value = total;
         calcChange();
     });
-});
-document.getElementById('exactPayBtn').addEventListener('click', function () {
-    const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
-    document.getElementById('paymentAmount').value = total;
-    calcChange();
-});
 
-function calcChange() {
-    const total   = cart.reduce((s, i) => s + i.price * i.qty, 0);
-    const paid    = parseFloat(document.getElementById('paymentAmount').value) || 0;
-    const change  = paid - total;
-    document.getElementById('changeAmount').textContent = change >= 0 ? 'Rp ' + numFmt(change) : '— (kurang Rp ' + numFmt(Math.abs(change)) + ')';
-    document.getElementById('changeAmount').className = 'fw-bold fs-4 ' + (change >= 0 ? 'text-primary' : 'text-danger');
-}
+    function calcChange() {
+        const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+        const paid = parseFloat(document.getElementById('paymentAmount').value) || 0;
+        const change = paid - total;
+        document.getElementById('changeAmount').textContent = change >= 0 ? 'Rp ' + numFmt(change) : '— (kurang Rp ' + numFmt(Math.abs(change)) + ')';
+        document.getElementById('changeAmount').className = 'fw-bold fs-4 ' + (change >= 0 ? 'text-primary' : 'text-danger');
+    }
 
-// ---- Process ----
-document.getElementById('btnProcess').addEventListener('click', function () {
-    const total  = cart.reduce((s, i) => s + i.price * i.qty, 0);
-    const paid   = parseFloat(document.getElementById('paymentAmount').value) || 0;
-    if (paid < total) { alert('Pembayaran kurang!'); return; }
+    // ---- Process ----
+    document.getElementById('btnProcess').addEventListener('click', function() {
+        const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+        const paid = parseFloat(document.getElementById('paymentAmount').value) || 0;
+        if (paid < total) {
+            alert('Pembayaran kurang!');
+            return;
+        }
 
-    this.disabled = true;
-    this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Memproses...';
+        this.disabled = true;
+        this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Memproses...';
 
-    const method = document.querySelector('input[name="paymentMethod"]:checked').value;
-    const note   = document.getElementById('transNote').value;
-    const items  = cart.map(i => ({ id: i.id, name: i.name, qty: i.qty }));
+        const method = document.querySelector('input[name="paymentMethod"]:checked').value;
+        const note = document.getElementById('transNote').value;
+        const items = cart.map(i => ({
+            id: i.id,
+            name: i.name,
+            qty: i.qty
+        }));
 
-    const form = new FormData();
-    form.append(CSRF_NAME, CSRF_TOKEN);
-    form.append('items', JSON.stringify(items));
-    form.append('payment_amount', paid);
-    form.append('payment_method', method);
-    form.append('note', note);
+        const form = new FormData();
+        form.append(CSRF_NAME, CSRF_TOKEN);
+        form.append('items', JSON.stringify(items));
+        form.append('payment_amount', paid);
+        form.append('payment_method', method);
+        form.append('note', note);
 
-    fetch(`${BASE_URL}kasir/transaction`, { method: 'POST', body: form })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                document.getElementById('modalInvoice').textContent = 'Invoice: ' + data.invoice_number;
-                document.getElementById('modalTotal').textContent = 'Rp ' + numFmt(data.total_amount);
-                document.getElementById('modalPay').textContent = 'Rp ' + numFmt(data.payment_amount);
-                document.getElementById('modalChange').textContent = 'Rp ' + numFmt(data.change_amount);
-                document.getElementById('btnPrint').href = data.print_url;
-                new bootstrap.Modal(document.getElementById('successModal')).show();
-            } else {
-                alert(data.message);
-                document.getElementById('btnProcess').disabled = false;
-                document.getElementById('btnProcess').innerHTML = '<i class="fas fa-check-circle me-2"></i>Proses Transaksi';
-            }
-        });
-});
+        fetch(`${BASE_URL}kasir/transaction`, {
+                method: 'POST',
+                body: form
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('modalInvoice').textContent = 'Invoice: ' + data.invoice_number;
+                    document.getElementById('modalTotal').textContent = 'Rp ' + numFmt(data.total_amount);
+                    document.getElementById('modalPay').textContent = 'Rp ' + numFmt(data.payment_amount);
+                    document.getElementById('modalChange').textContent = 'Rp ' + numFmt(data.change_amount);
+                    document.getElementById('btnPrint').href = data.print_url;
+                    new bootstrap.Modal(document.getElementById('successModal')).show();
+                } else {
+                    alert(data.message);
+                    document.getElementById('btnProcess').disabled = false;
+                    document.getElementById('btnProcess').innerHTML = '<i class="fas fa-check-circle me-2"></i>Proses Transaksi';
+                }
+            });
+    });
 
-function resetPOS() {
-    cart = [];
-    renderCart();
-    document.getElementById('paymentAmount').value = '';
-    document.getElementById('transNote').value = '';
-    document.getElementById('summaryTotal').textContent = 'Rp 0';
-    document.getElementById('changeAmount').textContent = 'Rp 0';
-    bootstrap.Modal.getInstance(document.getElementById('successModal')).hide();
-    document.getElementById('btnProcess').disabled = true;
-    document.getElementById('btnProcess').innerHTML = '<i class="fas fa-check-circle me-2"></i>Proses Transaksi';
-    document.getElementById('searchProduct').focus();
-}
+    function resetPOS() {
+        cart = [];
+        renderCart();
+        document.getElementById('paymentAmount').value = '';
+        document.getElementById('transNote').value = '';
+        document.getElementById('summaryTotal').textContent = 'Rp 0';
+        document.getElementById('changeAmount').textContent = 'Rp 0';
+        bootstrap.Modal.getInstance(document.getElementById('successModal')).hide();
+        document.getElementById('btnProcess').disabled = true;
+        document.getElementById('btnProcess').innerHTML = '<i class="fas fa-check-circle me-2"></i>Proses Transaksi';
+        document.getElementById('searchProduct').focus();
+    }
 
-function numFmt(n) { return Number(n).toLocaleString('id-ID'); }
+    function numFmt(n) {
+        return Number(n).toLocaleString('id-ID');
+    }
 </script>
+
 <?= $this->endSection() ?>

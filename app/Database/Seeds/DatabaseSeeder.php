@@ -26,7 +26,7 @@ class DatabaseSeeder extends Seeder
         $this->db->table('subscription_packages')->insert([
             'name'          => 'Paket Bulanan',
             'duration_days' => 30,
-            'price'         => 99000,
+            'price'         => 50000,
             'description'   => 'Akses penuh selama 30 hari',
             'is_active'     => 1,
             'created_at'    => $now,
@@ -36,7 +36,7 @@ class DatabaseSeeder extends Seeder
         $this->db->table('subscription_packages')->insert([
             'name'          => 'Paket Tahunan',
             'duration_days' => 365,
-            'price'         => 799000,
+            'price'         => 589000,
             'description'   => 'Akses penuh selama 1 tahun, hemat 33%',
             'is_active'     => 1,
             'created_at'    => $now,

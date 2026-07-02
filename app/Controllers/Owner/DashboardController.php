@@ -10,7 +10,7 @@ class DashboardController extends BaseController
 {
     public function index()
     {
-        $tenantId = session('tenant_id');
+        $tenantId = session()->get('tenant_id');
         $model    = new TransactionModel();
         $prodModel = new ProductModel();
 

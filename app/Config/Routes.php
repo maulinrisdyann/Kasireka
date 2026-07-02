@@ -4,9 +4,17 @@ use CodeIgniter\Router\RouteCollection;
 
 /** @var RouteCollection $routes */
 
-// Auth
-$routes->get('/', 'AuthController::login');
+
+// Public
+$routes->get('/', 'HomeController::index');
 $routes->get('login', 'AuthController::login');
+$routes->get('register', 'AuthController::register');
+$routes->post('register', 'AuthController::doRegister');
+
+
+// Auth
+//$routes->get('/', 'AuthController::login');
+//$routes->get('login', 'AuthController::login');
 $routes->post('login', 'AuthController::doLogin');
 $routes->get('logout', 'AuthController::logout');
 
@@ -29,6 +37,8 @@ $routes->group('admin', ['filter' => 'role:admin'], function ($routes) {
     $routes->get('packages/(:num)/edit', 'Admin\SubscriptionPackageController::edit/$1');
     $routes->post('packages/(:num)/edit', 'Admin\SubscriptionPackageController::update/$1');
     $routes->post('packages/(:num)/delete', 'Admin\SubscriptionPackageController::delete/$1');
+    $routes->get('payment-account', 'Admin\PaymentAccountController::index');
+    $routes->post('payment-account/store', 'Admin\PaymentAccountController::store');
 
     // Subscription Orders
     $routes->get('subscriptions', 'Admin\SubscriptionOrderController::index');

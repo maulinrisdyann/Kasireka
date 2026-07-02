@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\UserModel;
+use App\Models\TenantModel;
 
 class AuthController extends BaseController
 {
@@ -12,6 +13,46 @@ class AuthController extends BaseController
             return $this->redirectByRole(session()->get('role'));
         }
         return view('auth/login');
+    }
+
+    public function doRegister()
+    {
+        $tenantName = $this->request->getPost('tenant');
+        $email      = $this->request->getPost('email');
+        $password   = $this->request->getPost('password');
+
+        $tenantModel = new TenantModel();
+        $userModel   = new UserModel();
+
+
+        // buat tenant
+        $tenantId = $tenantModel->insert([
+            'name' => $tenantName,
+            'slug' => url_title($tenantName, '-', true),
+            'email' => $email,
+            'is_active' => 1,
+            'subscription_expires_at' => date('Y-m-d H:i:s', strtotime('+30 days'))
+        ]);
+
+
+        // buat owner
+        $userModel->insert([
+            'tenant_id' => $tenantId,
+            'name'      => $tenantName,
+            'email'     => $email,
+            'password'  => password_hash($password, PASSWORD_DEFAULT),
+            'role'      => 'owner',
+            'is_active' => 1
+        ]);
+
+
+        return redirect()->to(base_url('login'))
+            ->with('success', 'Registrasi berhasil, silahkan login');
+    }
+
+    public function register()
+    {
+        return view('auth/register');
     }
 
     public function doLogin()
