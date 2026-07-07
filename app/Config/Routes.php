@@ -22,6 +22,11 @@ $routes->get('logout', 'AuthController::logout');
 $routes->group('admin', ['filter' => 'role:admin'], function ($routes) {
     $routes->get('dashboard', 'Admin\DashboardController::index');
 
+    // Profile
+    $routes->get('profile', 'Admin\ProfileController::index', ['filter' => 'role:admin']);
+    $routes->post('profile/update', 'Admin\ProfileController::update', ['filter' => 'role:admin']);
+
+
     // Tenants
     $routes->get('tenants', 'Admin\TenantController::index');
     $routes->get('tenants/new', 'Admin\TenantController::create');
@@ -56,6 +61,10 @@ $routes->group('owner', ['filter' => 'role:owner'], function ($routes) {
     $routes->get('report/stock/export', 'Owner\ReportStockController::exportPdf');
     $routes->get('subscription', 'Owner\SubscriptionController::index');
     $routes->post('subscription/order', 'Owner\SubscriptionController::order');
+
+    // Profile
+    $routes->get('profile', 'Owner\ProfileController::index', ['filter' => 'role:owner']);
+    $routes->post('profile/update', 'Owner\ProfileController::update', ['filter' => 'role:owner']);
 
     // Kasir accounts
     $routes->get('kasir', 'Owner\KasirController::index');

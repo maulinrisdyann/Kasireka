@@ -68,11 +68,12 @@ class AuthController extends BaseController
         }
 
         session()->set([
-            'user_id'   => $user['id'],
-            'name'      => $user['name'],
-            'email'     => $user['email'],
-            'role'      => $user['role'],
-            'tenant_id' => $user['tenant_id'],
+            'user_id'        => $user['id'],
+            'tenant_id'      => $user['tenant_id'],
+            'name'           => $user['name'],
+            'email'          => $user['email'],
+            'role'           => $user['role'],
+            'profile_photo'  => $user['profile_photo']
         ]);
 
         return $this->redirectByRole($user['role']);

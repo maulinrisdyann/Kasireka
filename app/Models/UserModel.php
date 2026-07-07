@@ -9,7 +9,15 @@ class UserModel extends Model
     protected $table      = 'users';
     protected $primaryKey = 'id';
     protected $allowedFields = [
-        'tenant_id', 'name', 'email', 'password', 'role', 'is_active',
+        'tenant_id',
+        'name',
+        'email',
+        'password',
+        'role',
+        'profile_photo',
+        'phone',
+        'address',
+        'is_active',
     ];
     protected $useTimestamps = true;
     protected $hidden = ['password'];
@@ -18,4 +26,5 @@ class UserModel extends Model
     {
         return $this->where('email', $email)->first();
     }
+
 }

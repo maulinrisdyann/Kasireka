@@ -101,6 +101,11 @@
             <a href="<?= base_url('admin/dashboard') ?>" class="nav-link <?= uri_string() === 'admin/dashboard' ? 'active' : '' ?>">
                 <i class="fas fa-tachometer-alt me-2"></i> Dashboard
             </a>
+            <a href="<?= base_url('admin/profile') ?>"
+                class="nav-link <?= str_starts_with(uri_string(), 'admin/profile') ? 'active' : '' ?>">
+                <i class="fas fa-user-circle me-2"></i>
+                Profil Saya
+            </a>
             <div class="nav-section">Manajemen</div>
             <a href="<?= base_url('admin/tenants') ?>" class="nav-link <?= str_starts_with(uri_string(), 'admin/tenants') ? 'active' : '' ?>">
                 <i class="fas fa-store me-2"></i> Tenant
@@ -127,8 +132,29 @@
                 <i class="fas fa-bars"></i>
             </button>
             <div class="ms-auto d-flex align-items-center gap-3">
-                <span class="badge bg-danger">Admin</span>
-                <span class="fw-semibold"><?= esc(session('name')) ?></span>
+                <?php
+                if (session('profile_photo')) {
+                    $photo = base_url('uploads/profiles/' . session('profile_photo'));
+                } else {
+                    $photo = 'https://ui-avatars.com/api/?name=' .
+                        urlencode(session('name')) .
+                        '&background=0d6efd&color=fff';
+                }
+                ?>
+                <div class="d-flex align-items-center">
+                    <img
+                        src="<?= $photo ?>"
+                        width="40"
+                        height="40"
+                        class="rounded-circle border border-2 border-white me-2"
+                        style="object-fit:cover;">
+                    <div>
+                        <div class="fw-bold">
+                            <?= esc(session('name')) ?>
+                        </div>
+                        <span class="badge bg-danger">Administrator</span>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="page-content">
