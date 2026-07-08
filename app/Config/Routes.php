@@ -80,8 +80,8 @@ $routes->group('kasir', ['filter' => 'role:kasir'], function ($routes) {
     $routes->get('dashboard', 'Kasir\DashboardController::index');
 
     // Transactions
-    $routes->get('transaction', 'Kasir\TransactionController::index');
-    $routes->post('transaction', 'Kasir\TransactionController::store');
+    $routes->get('transaction', 'Kasir\TransactionController::index', ['filter' => 'subscription']);
+    $routes->post('transaction', 'Kasir\TransactionController::store', ['filter' => 'subscription']);
     $routes->get('transaction/history', 'Kasir\TransactionController::history');
     $routes->get('transaction/(:num)', 'Kasir\TransactionController::show/$1');
     $routes->get('transaction/(:num)/print', 'Kasir\TransactionController::printStruk/$1');

@@ -23,17 +23,8 @@ class RoleFilter implements FilterInterface
             return redirect()->to(base_url('login'))->with('error', 'Akses ditolak.');
         }
 
-        // Cek status langganan untuk owner dan kasir
-        if (in_array($userRole, ['owner', 'kasir'])) {
-            $tenantId = session()->get('tenant_id');
-            if ($tenantId) {
-                $tenantModel = new TenantModel();
-                if (!$tenantModel->isSubscriptionActive($tenantId)) {
-                    session()->destroy();
-                    return redirect()->to(base_url('login'))->with('error', 'Langganan Anda telah habis. Hubungi admin untuk perpanjang.');
-                }
-            }
-        }
+        // Cek status langganan untuk owner dan kasir // dihapus karena sudah di handle di SubscriptionFilter
+        
     }
 
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
