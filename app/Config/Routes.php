@@ -12,6 +12,36 @@ $routes->get('register', 'AuthController::register');
 $routes->post('register', 'AuthController::doRegister');
 
 
+/*
+|--------------------------------------------------------------------------
+| Email Verification
+|--------------------------------------------------------------------------
+*/
+
+$routes->get('verify-email/(:any)', 'AuthController::verifyEmail/$1');
+$routes->get('resend-verification', 'AuthController::resendVerification');
+$routes->post('resend-verification', 'AuthController::resendVerification');
+
+/*
+|--------------------------------------------------------------------------
+| Forgot Password
+|--------------------------------------------------------------------------
+*/
+
+$routes->get('forgot-password', 'AuthController::forgotPassword');
+$routes->post('forgot-password', 'AuthController::sendResetLink');
+
+
+/*
+|--------------------------------------------------------------------------
+| Reset Password
+|--------------------------------------------------------------------------
+*/
+
+$routes->get('reset-password/(:any)', 'AuthController::resetPassword/$1');
+$routes->post('reset-password', 'AuthController::updatePassword');
+
+
 // Auth
 //$routes->get('/', 'AuthController::login');
 //$routes->get('login', 'AuthController::login');
@@ -61,6 +91,8 @@ $routes->group('owner', ['filter' => 'role:owner'], function ($routes) {
     $routes->get('report/stock/export', 'Owner\ReportStockController::exportPdf');
     $routes->get('subscription', 'Owner\SubscriptionController::index');
     $routes->post('subscription/order', 'Owner\SubscriptionController::order');
+    $routes->get('profile/password', 'Owner\ProfileController::password');
+    $routes->post('profile/password', 'Owner\ProfileController::updatePassword');
 
     // Profile
     $routes->get('profile', 'Owner\ProfileController::index', ['filter' => 'role:owner']);
@@ -78,6 +110,8 @@ $routes->group('owner', ['filter' => 'role:owner'], function ($routes) {
 // Kasir routes
 $routes->group('kasir', ['filter' => 'role:kasir'], function ($routes) {
     $routes->get('dashboard', 'Kasir\DashboardController::index');
+    $routes->get('profile/password', 'Kasir\ProfileController::password');
+    $routes->post('profile/password', 'Kasir\ProfileController::updatePassword');
 
     // Transactions
     $routes->get('transaction', 'Kasir\TransactionController::index', ['filter' => 'subscription']);

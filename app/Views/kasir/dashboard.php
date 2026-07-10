@@ -29,7 +29,7 @@
             <div class="d-flex align-items-center justify-content-between">
                 <div>
                     <p class="mb-1 opacity-75 small">Pendapatan Hari Ini</p>
-                    <h3 class="mb-0 fw-bold" style="font-size:1.1rem">
+                    <h3 class="mb-0 fw-bold">
                         Rp <?= number_format($sales_today['total_revenue'] ?? 0, 0, ',', '.') ?>
                     </h3>
                 </div>

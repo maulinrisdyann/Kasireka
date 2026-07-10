@@ -111,9 +111,17 @@
                     <label class="form-label fw-semibold text-sm">Password</label>
                     <div class="input-group">
                         <span class="input-group-text bg-light border-end-0"><i class="fas fa-lock text-muted"></i></span>
-                        <input type="password" name="password" class="form-control border-start-0 ps-0"
+                        <input id="login_password" type="password" name="password" class="form-control border-start-0 ps-0"
                             placeholder="••••••••" required>
+                        <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('login_password', this)">
+                            <i class="fas fa-eye"></i>
+                        </button>
                     </div>
+                </div>
+                <div class="text-end mb-3">
+                    <a href="<?= base_url('forgot-password') ?>" class="small text-decoration-none">
+                        Lupa Password?
+                    </a>
                 </div>
                 <button type="submit" class="btn btn-login btn-primary w-100">
                     <i class="fas fa-sign-in-alt me-2"></i>Masuk
@@ -143,6 +151,21 @@
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function togglePassword(fieldId, btn) {
+            const input = document.getElementById(fieldId);
+            if (!input) return;
+
+            const icon = btn.querySelector('i');
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+
+            if (icon) {
+                icon.classList.toggle('fa-eye');
+                icon.classList.toggle('fa-eye-slash');
+            }
+        }
+    </script>
 </body>
 
 </html>

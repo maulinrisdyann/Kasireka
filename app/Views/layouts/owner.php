@@ -114,7 +114,11 @@
             <a href="<?= base_url('owner/profile') ?>"
                 class="nav-link <?= str_starts_with(uri_string(), 'owner/profile') ? 'active' : '' ?>">
                 <i class="fas fa-user-circle me-2"></i>
-                Profil Saya
+                Profile Saya
+            </a>
+            <a href="<?= base_url('owner/profile/password') ?>" class="nav-link">
+                <i class="fas fa-key me-2"></i>
+                Ubah Password
             </a>
             <div class="nav-section">Laporan</div>
             <a href="<?= base_url('owner/report/sales') ?>" class="nav-link <?= str_starts_with(uri_string(), 'owner/report/sales') ? 'active' : '' ?>">

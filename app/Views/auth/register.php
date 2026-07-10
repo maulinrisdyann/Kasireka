@@ -139,11 +139,15 @@
                             <i class="fas fa-lock text-muted"></i>
                         </span>
                         <input
+                            id="register_password"
                             class="form-control"
                             name="password"
                             type="password"
                             placeholder="••••••••"
                             required>
+                        <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('register_password', this)">
+                            <i class="fas fa-eye"></i>
+                        </button>
                     </div>
                 </div>
                 <button class="btn btn-register btn-primary w-100">
@@ -167,5 +171,20 @@
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function togglePassword(fieldId, btn) {
+            const input = document.getElementById(fieldId);
+            if (!input) return;
+
+            const icon = btn.querySelector('i');
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+
+            if (icon) {
+                icon.classList.toggle('fa-eye');
+                icon.classList.toggle('fa-eye-slash');
+            }
+        }
+    </script>
 </body>
 </html>

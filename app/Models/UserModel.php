@@ -18,6 +18,11 @@ class UserModel extends Model
         'phone',
         'address',
         'is_active',
+        'email_verified',
+        'email_verified_at',
+        'verification_token',
+        'reset_token',
+        'reset_token_expired_at',
     ];
     protected $useTimestamps = true;
     protected $hidden = ['password'];
@@ -26,5 +31,4 @@ class UserModel extends Model
     {
         return $this->where('email', $email)->first();
     }
-
 }
