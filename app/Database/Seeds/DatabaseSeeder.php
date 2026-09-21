@@ -10,78 +10,7 @@ class DatabaseSeeder extends Seeder
     {
         $now = date('Y-m-d H:i:s');
 
-        // 1. Admin super
-        $this->db->table('users')->insert([
-            'tenant_id'  => null,
-            'name'       => 'Super Admin',
-            'email'      => 'admin@kasirpos.com',
-            'password'   => password_hash('admin123', PASSWORD_BCRYPT),
-            'role'       => 'admin',
-            'is_active'  => 1,
-            'created_at' => $now,
-            'updated_at' => $now,
-        ]);
-
-        // 2. Paket langganan demo
-        $this->db->table('subscription_packages')->insert([
-            'name'          => 'Paket Bulanan',
-            'duration_days' => 30,
-            'price'         => 50000,
-            'description'   => 'Akses penuh selama 30 hari',
-            'is_active'     => 1,
-            'created_at'    => $now,
-            'updated_at'    => $now,
-        ]);
-
-        $this->db->table('subscription_packages')->insert([
-            'name'          => 'Paket Tahunan',
-            'duration_days' => 365,
-            'price'         => 589000,
-            'description'   => 'Akses penuh selama 1 tahun, hemat 33%',
-            'is_active'     => 1,
-            'created_at'    => $now,
-            'updated_at'    => $now,
-        ]);
-
-        // 3. Tenant demo
-        $this->db->table('tenants')->insert([
-            'name'                    => 'Toko Serbaguna Maju',
-            'slug'                    => 'toko-maju',
-            'email'                   => 'toko@maju.com',
-            'phone'                   => '081234567890',
-            'address'                 => 'Jl. Raya No. 1, Jakarta',
-            'is_active'               => 1,
-            'subscription_expires_at' => date('Y-m-d H:i:s', strtotime('+365 days')),
-            'created_at'              => $now,
-            'updated_at'              => $now,
-        ]);
-
-        $tenantId = $this->db->insertID();
-
-        // 4. Owner tenant demo
-        $this->db->table('users')->insert([
-            'tenant_id'  => $tenantId,
-            'name'       => 'Owner Toko Maju',
-            'email'      => 'owner@maju.com',
-            'password'   => password_hash('owner123', PASSWORD_BCRYPT),
-            'role'       => 'owner',
-            'is_active'  => 1,
-            'created_at' => $now,
-            'updated_at' => $now,
-        ]);
-
-        // 5. Kasir tenant demo
-        $this->db->table('users')->insert([
-            'tenant_id'  => $tenantId,
-            'name'       => 'Kasir Budi',
-            'email'      => 'kasir@maju.com',
-            'password'   => password_hash('kasir123', PASSWORD_BCRYPT),
-            'role'       => 'kasir',
-            'is_active'  => 1,
-            'created_at' => $now,
-            'updated_at' => $now,
-        ]);
-
+        
         // 6. Kategori demo
         $categories = ['Minuman', 'Makanan', 'Sembako', 'Alat Tulis', 'Elektronik'];
         $catIds = [];
